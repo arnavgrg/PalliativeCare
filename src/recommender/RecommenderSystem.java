@@ -33,11 +33,13 @@ public class RecommenderSystem {
         similarity.buildSimilarityMatrix(dataModel);
         context.setSimilarity(similarity);
 
+        // display the top 10
         // build recommender
         conf.set("rec.neighbors.knn.number", "5");
+        conf.set("rec.recommender.ranking.topn", "3");
         Recommender recommender = new ItemKNNRecommender();
         recommender.setContext(context);
-
+        
         // run recommender algorithm
         recommender.recommend(context);
 
@@ -49,7 +51,6 @@ public class RecommenderSystem {
         List<String> userIdList = new ArrayList<>();
         List<String> itemIdList = new ArrayList<>();
         userIdList.add("1");
-        itemIdList.add("70");
 
         // filter the recommended result
         List<RecommendedItem> recommendedItemList = recommender.getRecommendedList();
