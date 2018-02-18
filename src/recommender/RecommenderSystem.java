@@ -16,8 +16,10 @@ import net.librec.similarity.PCCSimilarity;
 import net.librec.similarity.RecommenderSimilarity;
 
 public class RecommenderSystem {
-    public static void main(String[] args) throws Exception {
-
+    
+    public RecommenderSystem() {}
+    
+    public List<Integer> recommend(int userId) throws Exception {
         // build data model
         Configuration conf = new Configuration();
         conf.set("dfs.data.dir","./data");
@@ -62,12 +64,15 @@ public class RecommenderSystem {
         recommendedItemList = filter.filter(recommendedItemList);
 
         // print filter result
+        List<Integer> compatiblePersonalities = new ArrayList<>();
         for (RecommendedItem recommendedItem : recommendedItemList) {
             System.out.println(
                     "user:" + recommendedItem.getUserId() + " " +
                     "item:" + recommendedItem.getItemId() + " " +
                     "value:" + recommendedItem.getValue()
             );
+            compatiblePersonalities.add(Integer.getInteger(recommendedItem.getItemId()));
         }
+        return compatiblePersonalities;
     }
 }

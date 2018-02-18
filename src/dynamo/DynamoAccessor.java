@@ -23,26 +23,21 @@ import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
+import com.google.gson.Gson;
 
 import profile.PatientProfile;
 import profile.Profile;
+import profile.VolunteerProfile;
 
 public class DynamoAccessor {
-    private static Table table;
+    private Table table;
+    private AmazonDynamoDB client;
+    private Gson gson = new Gson();
     
-    public static void main(String[] args) {
-	AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
-	
-	Profile patient = new PatientProfile();
-	patient.setUserName("user1");
-	patient.setPassword("password");
-	persistToTable(client, "TestPatient", patient);
+    public DynamoAccessor(AmazonDynamoDB client) {
+	this.client = client;
     }
-    
-    public static void createTable(String tableName) {
-	AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
-		.build();
-
+    public void createTable(String tableName) {
 	DynamoDB dynamoDB = new DynamoDB(client);
 
 	try {
@@ -67,14 +62,14 @@ public class DynamoAccessor {
     }
     
     // TODO: customize
-    public static void updateAddNewAttribute(AmazonDynamoDB client, String tableName,
+    public void updateAddNewAttribute(AmazonDynamoDB client, String tableName,
 	    String userName, String attributeName, String attributeValue) {
 	DynamoDB dynamoDB = new DynamoDB(client);
 	table = dynamoDB.getTable(tableName);
-	
+	System.out.println(tableName);
         try {
             UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("username", userName)
-                .withUpdateExpression("set #na = :val1").withNameMap(new NameMap().with("#na", attributeName))
+                .withUpdateExpression("set #na =:val1").withNameMap(new NameMap().with("#na", attributeName))
                 .withValueMap(new ValueMap().withString(":val1", attributeValue)).withReturnValues(ReturnValue.ALL_NEW);
 
             UpdateItemOutcome outcome = table.updateItem(updateItemSpec);
@@ -90,7 +85,7 @@ public class DynamoAccessor {
         }
     }
     
-    public static boolean persistToTable(AmazonDynamoDB client, String tableName, Profile profile) {
+    public boolean persistToTable(AmazonDynamoDB client, String tableName, Profile profile) {
 	DynamoDB dynamoDB = new DynamoDB(client);
 	table = dynamoDB.getTable(tableName);
 	
@@ -99,7 +94,9 @@ public class DynamoAccessor {
 	    // TODO: change how to put item once profile finalized
 	    PutItemOutcome outcome = table
 		    .putItem(new Item().withPrimaryKey("username", profile.getUserName())
-			    .withString("password", "default"));
+			    .withString("password", profile.getPassword())
+			    .withInt("personalityId", profile.getPersonalityId())
+			    );
 
 	    System.out.println("PutItem succeeded:\n" + outcome.getPutItemResult());
 	    return true;
@@ -111,7 +108,7 @@ public class DynamoAccessor {
 	return false;
     }
     
-    public static void fetchFromTable(AmazonDynamoDB client, String tableName, 
+    public VolunteerProfile fetchFromTable(AmazonDynamoDB client, String tableName, 
 	    String username) {
 	DynamoDB dynamoDB = new DynamoDB(client);
 	table = dynamoDB.getTable(tableName);
@@ -128,6 +125,30 @@ public class DynamoAccessor {
 	while (iterator.hasNext()) {
 	    item = iterator.next();
 	    System.out.println(item.toJSONPretty());
+	    return gson.fromJson(item.toJSON(), VolunteerProfile.class);
 	}
+	return null;
+    }
+    
+    public PatientProfile fetchPatientFromTable(AmazonDynamoDB client, String tableName, 
+	    String username) {
+	DynamoDB dynamoDB = new DynamoDB(client);
+	table = dynamoDB.getTable(tableName);
+	
+	QuerySpec spec = new QuerySpec()
+		.withKeyConditionExpression("username = :v_id")
+		.withValueMap(new ValueMap()
+			.withString(":v_id", username));
+
+	ItemCollection<QueryOutcome> items = table.query(spec);
+
+	Iterator<Item> iterator = items.iterator();
+	Item item = null;
+	while (iterator.hasNext()) {
+	    item = iterator.next();
+	    System.out.println(item.toJSONPretty());
+	    return gson.fromJson(item.toJSON(), PatientProfile.class);
+	}
+	return null;
     }
 }

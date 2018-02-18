@@ -10,6 +10,7 @@ public class PatientProfile implements Profile {
     private String username;
     private String name;
     private String password;
+    private String info;
     private int age;
     private ArrayList<String> interests = new ArrayList<String>();
     private String gender;
@@ -59,4 +60,36 @@ public class PatientProfile implements Profile {
 	this.password = password;
     }
 
+    @Override
+    public void setPersonalityID(int personalityId) {
+	// TODO Auto-generated method stub
+	this.personalityID = personalityId;
+    }
+
+    public int getPersonalityId() {
+	return personalityID;
+    }
+
+    @Override
+    public String getPassword() {
+	// TODO Auto-generated method stub
+	return password;
+    }
+
+    @Override
+    public String getGender() {
+	// TODO Auto-generated method stub
+	return gender;
+    }
+
+    @Override
+    public String getInfo() {
+	// TODO Auto-generated method stub
+	return info;
+    }
+
+    public void setInfo(String info) {
+	// TODO Auto-generated method stub
+	this.info = info;
+    }
 }

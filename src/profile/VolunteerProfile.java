@@ -10,6 +10,7 @@ public class VolunteerProfile implements Profile  {
     private String name;
     private String username;
     private String password;
+    private String info;
     private int age;
     private ArrayList<String> interests = new ArrayList<String>();
     private String gender;
@@ -18,7 +19,16 @@ public class VolunteerProfile implements Profile  {
     private int personalityID;
     private int rating;
 
-
+    public void setInfo(String info) {
+	this.info = info;
+    }
+    
+    public int getPersonalityId() { return personalityID;  }
+    
+    public String getInfo() {
+	return info;
+    }
+    
     public void setName(String pName) {
 	name = pName;
     }
@@ -58,5 +68,23 @@ public class VolunteerProfile implements Profile  {
     public void setPassword(String password) {
 	// TODO Auto-generated method stub
 	this.password = password;
+    }
+
+    @Override
+    public void setPersonalityID(int personalityId) {
+	// TODO Auto-generated method stub
+	this.personalityID = personalityId;
+    }
+
+    @Override
+    public String getPassword() {
+	// TODO Auto-generated method stub
+	return password;
+    }
+
+    @Override
+    public String getGender() {
+	// TODO Auto-generated method stub
+	return gender;
     }
 }
