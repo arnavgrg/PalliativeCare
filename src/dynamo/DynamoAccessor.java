@@ -24,6 +24,10 @@ import profile.Profile;
 public class DynamoAccessor {
     private static Table table;
     
+    public static void main(String[] args) {
+	persistToTable(null);
+	
+    }
     public static void createTable(String tableName) {
 	AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
 		.build();
@@ -56,7 +60,7 @@ public class DynamoAccessor {
 	    System.out.println("Adding a new item...");
 	    // TODO: change how to put item once profile finalized
 	    PutItemOutcome outcome = table
-		    .putItem(new Item().withPrimaryKey("age", 0));
+		    .putItem(new Item().withPrimaryKey("year", 2012).withString("title", "2012"));
 
 	    System.out.println("PutItem succeeded:\n" + outcome.getPutItemResult());
 	    return true;
