@@ -20,7 +20,9 @@ public class RecommenderSystem {
 
         // build data model
         Configuration conf = new Configuration();
-        conf.set("dfs.data.dir", "C:\\Users\\Jason\\Documents\\librec-2.0.0\\librec-2.0.0\\data");
+        conf.set("dfs.data.dir","./data");
+        conf.set("data.input.path","Training.txt");
+        conf.set("data.column.format","UIR");
         TextDataModel dataModel = new TextDataModel(conf);
         dataModel.buildDataModel();
 

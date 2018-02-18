@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+	$(document).ready(function(){
+		$("#getReq").click(function(){
+			$.ajax({
+				url: 'https://jm9p05fq33.execute-api.us-west-2.amazonaws.com/beta/PalliativeCare?TableName=TestPatient',
+				type: 'POST',
+				data: JSON.stringify({"TableName": "TestPatient", "Item": {"username":"Paul", "password":"1111", "interest":"basketball"}}),
+				success: function(data) {
+				alert("POSTed successfully");
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				alert("Error");
+			}
+		});
+	});
+});
+</script>
+</head>
+<body>
+<div>
+<br>
+<button id="getReq">Send HTTP GET request to a AWS and get result</button>
+<br>
+</div>
+<div id="result">
+Result
+</div>
+</body>
+</html>

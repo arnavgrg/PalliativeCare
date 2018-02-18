@@ -12,11 +12,16 @@ import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
+import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
+import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
 import profile.Profile;
@@ -28,6 +33,7 @@ public class DynamoAccessor {
 	persistToTable(null);
 	
     }
+    
     public static void createTable(String tableName) {
 	AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
 		.build();
@@ -53,6 +59,26 @@ public class DynamoAccessor {
 	    System.err.println("Unable to create table: ");
 	    System.err.println(e.getMessage());
 	}
+    }
+    
+    // TODO: customize
+    public static void updateAddNewAttribute() {
+        try {
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("Id", 121)
+                .withUpdateExpression("set #na = :val1").withNameMap(new NameMap().with("#na", "NewAttribute"))
+                .withValueMap(new ValueMap().withString(":val1", "Some value")).withReturnValues(ReturnValue.ALL_NEW);
+
+            UpdateItemOutcome outcome = table.updateItem(updateItemSpec);
+
+            // Check the response.
+            System.out.println("Printing item after adding new attribute...");
+            System.out.println(outcome.getItem().toJSONPretty());
+
+        }
+        catch (Exception e) {
+            System.err.println("Failed to add new attribute");
+            System.err.println(e.getMessage());
+        }
     }
     
     public static boolean persistToTable(Profile profile) {
