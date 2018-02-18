@@ -3,19 +3,27 @@ package profile;
 import java.util.ArrayList;
 
 public interface Profile {
+    String username = "";
+    String password = "";
     String name = "";
     int age = 0;
     String gender = "";
     ArrayList<String> interests = new ArrayList<String>();
     
-    void setName(String name);
+    public void setPassword(String password);
     
-    void setAge(int age);
+    public void setUserName(String username);
     
-    void setGender(String pGender);
+    public void setName(String name);
     
-    void setLocation(String pLocation);
+    public void setAge(int age);
+    
+    public void setGender(String pGender);
+    
+    public void setLocation(String pLocation);
     
     public ArrayList<String> getInterests();
+    
+    public String getUserName();
     
 }

@@ -24,14 +24,19 @@ import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
+import profile.PatientProfile;
 import profile.Profile;
 
 public class DynamoAccessor {
     private static Table table;
     
     public static void main(String[] args) {
-	persistToTable(null);
+	AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
 	
+	Profile patient = new PatientProfile();
+	patient.setUserName("user1");
+	patient.setPassword("password");
+	persistToTable(client, "TestPatient", patient);
     }
     
     public static void createTable(String tableName) {
@@ -62,11 +67,15 @@ public class DynamoAccessor {
     }
     
     // TODO: customize
-    public static void updateAddNewAttribute() {
+    public static void updateAddNewAttribute(AmazonDynamoDB client, String tableName,
+	    String userName, String attributeName, String attributeValue) {
+	DynamoDB dynamoDB = new DynamoDB(client);
+	table = dynamoDB.getTable(tableName);
+	
         try {
-            UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("Id", 121)
-                .withUpdateExpression("set #na = :val1").withNameMap(new NameMap().with("#na", "NewAttribute"))
-                .withValueMap(new ValueMap().withString(":val1", "Some value")).withReturnValues(ReturnValue.ALL_NEW);
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("username", userName)
+                .withUpdateExpression("set #na = :val1").withNameMap(new NameMap().with("#na", attributeName))
+                .withValueMap(new ValueMap().withString(":val1", attributeValue)).withReturnValues(ReturnValue.ALL_NEW);
 
             UpdateItemOutcome outcome = table.updateItem(updateItemSpec);
 
@@ -81,12 +90,16 @@ public class DynamoAccessor {
         }
     }
     
-    public static boolean persistToTable(Profile profile) {
+    public static boolean persistToTable(AmazonDynamoDB client, String tableName, Profile profile) {
+	DynamoDB dynamoDB = new DynamoDB(client);
+	table = dynamoDB.getTable(tableName);
+	
 	try {
 	    System.out.println("Adding a new item...");
 	    // TODO: change how to put item once profile finalized
 	    PutItemOutcome outcome = table
-		    .putItem(new Item().withPrimaryKey("year", 2012).withString("title", "2012"));
+		    .putItem(new Item().withPrimaryKey("username", profile.getUserName())
+			    .withString("password", "default"));
 
 	    System.out.println("PutItem succeeded:\n" + outcome.getPutItemResult());
 	    return true;
@@ -98,59 +111,23 @@ public class DynamoAccessor {
 	return false;
     }
     
-    // TODO: change return type into dataset format
-    public static void fetchFromTable(String partitionKey, String sortKey) {
-	HashMap<String, String> nameMap = new HashMap<String, String>();
-	nameMap.put("#yr", "year");
+    public static void fetchFromTable(AmazonDynamoDB client, String tableName, 
+	    String username) {
+	DynamoDB dynamoDB = new DynamoDB(client);
+	table = dynamoDB.getTable(tableName);
+	
+	QuerySpec spec = new QuerySpec()
+		.withKeyConditionExpression("username = :v_id")
+		.withValueMap(new ValueMap()
+			.withString(":v_id", username));
 
-	HashMap<String, Object> valueMap = new HashMap<String, Object>();
-	valueMap.put(":yyyy", 1985);
+	ItemCollection<QueryOutcome> items = table.query(spec);
 
-	QuerySpec querySpec = new QuerySpec().withKeyConditionExpression("#yr = :yyyy").withNameMap(nameMap)
-		.withValueMap(valueMap);
-
-	ItemCollection<QueryOutcome> items = null;
-	Iterator<Item> iterator = null;
+	Iterator<Item> iterator = items.iterator();
 	Item item = null;
-
-	try {
-	    System.out.println("Movies from 1985");
-	    items = table.query(querySpec);
-
-	    iterator = items.iterator();
-	    while (iterator.hasNext()) {
-		item = iterator.next();
-		System.out.println(item.getNumber("year") + ": " + item.getString("title"));
-	    }
-
+	while (iterator.hasNext()) {
+	    item = iterator.next();
+	    System.out.println(item.toJSONPretty());
 	}
-	catch (Exception e) {
-	    System.err.println("Unable to query movies from 1985");
-	    System.err.println(e.getMessage());
-	}
-
-	valueMap.put(":yyyy", 1992);
-	valueMap.put(":letter1", "A");
-	valueMap.put(":letter2", "L");
-
-	querySpec.withProjectionExpression("#yr, title, info.genres, info.actors[0]")
-	.withKeyConditionExpression("#yr = :yyyy and title between :letter1 and :letter2").withNameMap(nameMap)
-	.withValueMap(valueMap);
-
-	try {
-	    System.out.println("Movies from 1992 - titles A-L, with genres and lead actor");
-	    items = table.query(querySpec);
-
-	    iterator = items.iterator();
-	    while (iterator.hasNext()) {
-		item = iterator.next();
-		System.out.println(item.getNumber("year") + ": " + item.getString("title") + " " + item.getMap("info"));
-	    }
-
-	}
-	catch (Exception e) {
-	    System.err.println("Unable to query movies from 1992:");
-	    System.err.println(e.getMessage());
-	}
-   }
+    }
 }

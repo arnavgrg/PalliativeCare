@@ -1,7 +1,7 @@
 package personality;
 
 public class PersonalityType {
-    int personalityId;
+    private int personalityId;
     
     public PersonalityType() {
 	this.personalityId = 0;

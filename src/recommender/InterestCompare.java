@@ -1,4 +1,4 @@
-package Recommender;
+package recommender;
 
 import java.util.ArrayList;
 import java.util.Iterator;
