@@ -13,3 +13,8 @@ the users entered and compares them with the other type of user(volunteer to pat
 and vice versa), and matches them using machine learning algorithms.
 
 Devpost: https://devpost.com/software/palliativecare 
+
+Team:
+- Jason Zhao
+- Steven Tat
+- Arnav Garg
